@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "tushar9303/means-project:latest" // Docker image name
+        DOCKER_IMAGE = "tushar5464/means-project:latest" // Docker image name
         KUBE_DEPLOYMENT = "means-project-deploy"         // Kubernetes deployment name
         KUBE_CONTAINER = "means-project-container"      // Container name in deployment
         KUBE_NAMESPACE = "default"                       // Namespace (change if needed)
