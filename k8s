@@ -12,10 +12,11 @@ spec:
   template:
     metadata:
       labels:
-        app: nginx
+        app: mytest
     spec:
       containers:
       - name: tushar
         image: tushar5464/feans:latest
         ports:
         - containerPort: 80
+
