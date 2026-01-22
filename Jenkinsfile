@@ -13,7 +13,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main', 
-                    url: 'https://github.com/tushar9303/means-project.git',
+                    url: 'https://github.com/tushar5464/means-project.git',
                     credentialsId: 'github-creds' // GitHub credentials
             }
         }
