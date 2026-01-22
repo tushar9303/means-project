@@ -2,30 +2,35 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "tushar9303/means-project:latest"
+        DOCKER_IMAGE = "tushar9303/means-project:latest" // Docker image name
+        KUBE_DEPLOYMENT = "means-project-deploy"         // Kubernetes deployment name
+        KUBE_CONTAINER = "means-project-container"      // Container name in deployment
+        KUBE_NAMESPACE = "default"                       // Namespace (change if needed)
     }
 
     stages {
 
         stage('Checkout') {
             steps {
-                git branch: 'main',
+                git branch: 'main', 
                     url: 'https://github.com/tushar9303/means-project.git',
-                    credentialsId: 'github-creds'
+                    credentialsId: 'github-creds' // GitHub credentials
             }
         }
 
+   
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE} ."
+                sh "docker build -t ${DOCKER_IMAGE} ." // Build Docker image
             }
         }
 
+   
         stage('Login to DockerHub') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'docker-hub',
-                    usernameVariable: 'DOCKER_USER',
+                    credentialsId: 'docker-hub',    // DockerHub credentials ID in Jenkins
+                    usernameVariable: 'DOCKER_USER', 
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
                     sh '''
@@ -35,20 +40,29 @@ pipeline {
             }
         }
 
+     
         stage('Push Docker Image') {
             steps {
-                sh "docker push ${DOCKER_IMAGE}"
+                sh "docker push ${DOCKER_IMAGE}" // Push Docker image to DockerHub
             }
         }
 
+      
         stage('Deploy to Kubernetes') {
             steps {
-                sh '''
-                kubectl set image deployment/means-project-deploy \
-                means-project-container=${DOCKER_IMAGE}
-                kubectl rollout status deployment/means-project-deploy
-                '''
+                sh """
+                # Update image if deployment exists
+                kubectl -n ${KUBE_NAMESPACE} set image deployment/${KUBE_DEPLOYMENT} \
+                ${KUBE_CONTAINER}=${DOCKER_IMAGE} || \
+                # If deployment doesn't exist, create it using a YAML manifest
+                kubectl -n ${KUBE_NAMESPACE} apply -f k8s-deployment.yaml
+
+                # Wait for rollout to complete
+                kubectl -n ${KUBE_NAMESPACE} rollout status deployment/${KUBE_DEPLOYMENT}
+                """
             }
         }
     }
 }
+
+
